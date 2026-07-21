@@ -81,11 +81,11 @@
                     <ScrollViewer x:Name="VehicleReadScroll"
                                   Margin="12,0,12,12"
                                   VerticalScrollBarVisibility="Auto">
-                        <TextBlock x:Name="VehicleReadText"
-                                   Text="왼쪽에서 차량 문서를 선택하세요."
-                                   FontSize="15"
-                                   LineHeight="24"
-                                   TextWrapping="Wrap" />
+                        <FlowDocumentScrollViewer x:Name="VehicleReadDocumentViewer">
+                            <FlowDocument FontSize="15" LineHeight="24">
+                                <Paragraph>왼쪽에서 차량 문서를 선택하세요.</Paragraph>
+                            </FlowDocument>
+                        </FlowDocumentScrollViewer>
                     </ScrollViewer>
                 </DockPanel>
             </Border>

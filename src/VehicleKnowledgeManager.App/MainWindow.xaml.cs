@@ -1,6 +1,8 @@
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Documents;
+using System.Windows.Media;
 using CarWikipedia.Core.Models;
 using CarWikipedia.Core.Settings;
 using CarWikipedia.Infrastructure.FileSystem;
@@ -130,7 +132,7 @@ public partial class MainWindow : Window
             _currentTreeItem = treeViewItem;
             _currentMarkdown = markdown;
             VehicleReadTitle.Text = document.Name;
-            VehicleReadText.Text = ToReadText(markdown);
+            VehicleReadDocumentViewer.Document = RenderMarkdown(markdown);
             MarkdownEditor.Text = markdown;
             SetDirtyState(false);
             SetEditMode(false);
@@ -138,7 +140,7 @@ public partial class MainWindow : Window
         catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
         {
             VehicleReadTitle.Text = document.Name;
-            VehicleReadText.Text = $"문서를 열 수 없습니다.\n\n{exception.Message}";
+            VehicleReadDocumentViewer.Document = RenderMarkdown($"문서를 열 수 없습니다.\n\n- {exception.Message}");
         }
     }
 
@@ -163,7 +165,7 @@ public partial class MainWindow : Window
         {
             _currentMarkdown = MarkdownEditor.Text;
             await _documentRepository.SaveAsync(_currentDocument.FullPath, _currentMarkdown);
-            VehicleReadText.Text = ToReadText(_currentMarkdown);
+            VehicleReadDocumentViewer.Document = RenderMarkdown(_currentMarkdown);
             SetDirtyState(false);
             DocumentScanStatusText.Text = $"저장 완료: {_currentDocument.Name}";
         }
@@ -194,16 +196,78 @@ public partial class MainWindow : Window
         return items.Sum(item => item.IsDirectory ? CountDocuments(item.Children) : 1);
     }
 
-    private static string ToReadText(string markdown)
+    private static FlowDocument RenderMarkdown(string markdown)
     {
-        var lines = markdown.ReplaceLineEndings("\n")
-            .Split('\n')
-            .Select(line => line.TrimEnd())
-            .Select(line => line.StartsWith("### ", StringComparison.Ordinal) ? line[4..] : line)
-            .Select(line => line.StartsWith("# ", StringComparison.Ordinal) ? $"\n{line[2..]}" : line)
-            .Select(line => line.StartsWith("- ", StringComparison.Ordinal) ? $"  • {line[2..]}" : line);
+        var document = new FlowDocument
+        {
+            FontSize = 15,
+            LineHeight = 24,
+            PagePadding = new Thickness(0)
+        };
 
-        return string.Join(Environment.NewLine, lines).Trim();
+        foreach (var rawLine in markdown.ReplaceLineEndings("\n").Split('\n'))
+        {
+            var line = rawLine.Trim();
+            if (string.IsNullOrWhiteSpace(line))
+            {
+                continue;
+            }
+
+            document.Blocks.Add(CreateReadBlock(line));
+        }
+
+        if (document.Blocks.Count == 0)
+        {
+            document.Blocks.Add(new Paragraph(new Run("내용이 없습니다.")));
+        }
+
+        return document;
+    }
+
+    private static Block CreateReadBlock(string line)
+    {
+        if (line.StartsWith("### ", StringComparison.Ordinal))
+        {
+            return new Paragraph(new Run(line[4..]))
+            {
+                FontSize = 26,
+                FontWeight = FontWeights.Bold,
+                Margin = new Thickness(0, 0, 0, 16)
+            };
+        }
+
+        if (line.StartsWith("# ", StringComparison.Ordinal))
+        {
+            return new Paragraph(new Run(line[2..]))
+            {
+                FontSize = 21,
+                FontWeight = FontWeights.SemiBold,
+                Margin = new Thickness(0, 18, 0, 8)
+            };
+        }
+
+        if (line.StartsWith("- ", StringComparison.Ordinal))
+        {
+            return new Paragraph(new Run($"• {line[2..]}"))
+            {
+                Margin = new Thickness(18, 2, 0, 2)
+            };
+        }
+
+        if (line is "기본 옵션" or "추가 옵션")
+        {
+            return new Paragraph(new Run(line))
+            {
+                FontWeight = FontWeights.SemiBold,
+                Foreground = Brushes.DarkSlateGray,
+                Margin = new Thickness(0, 8, 0, 4)
+            };
+        }
+
+        return new Paragraph(new Run(line))
+        {
+            Margin = new Thickness(0, 2, 0, 2)
+        };
     }
 
     private void PopulateVehicleTree(IEnumerable<DocumentItem> items)
