@@ -35,7 +35,7 @@
 
 ## Phase 2 - 로컬 Markdown 지식 베이스 기반
 
-- [ ] 솔루션 이름을 `CarWikipedia.sln`으로 정리한다.
+- [x] 솔루션 이름을 `CarWikipedia.sln`으로 정리한다.
 - [ ] 루트 네임스페이스를 `CarWikipedia`로 정리한다.
 - [ ] 실행 파일명을 `CarWikipedia.exe`로 맞춘다.
 - [ ] 저장소 폴더 선택 기능을 추가한다.
