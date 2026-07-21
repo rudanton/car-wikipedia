@@ -1,5 +1,6 @@
 using System.IO;
 using System.Windows;
+using System.Windows.Controls;
 using CarWikipedia.Core.Models;
 using CarWikipedia.Core.Settings;
 using CarWikipedia.Infrastructure.FileSystem;
@@ -61,6 +62,7 @@ public partial class MainWindow : Window
         {
             _documentTree = [];
             DocumentScanStatusText.Text = "스캔 대기 중";
+            VehicleTree.Items.Clear();
             return;
         }
 
@@ -69,6 +71,7 @@ public partial class MainWindow : Window
         {
             _documentTree = [];
             DocumentScanStatusText.Text = "vehicles 폴더를 찾을 수 없습니다.";
+            VehicleTree.Items.Clear();
             return;
         }
 
@@ -76,11 +79,13 @@ public partial class MainWindow : Window
         {
             _documentTree = await _documentRepository.LoadTreeAsync(vehicleRootPath);
             DocumentScanStatusText.Text = $"Markdown 문서 {CountDocuments(_documentTree)}개";
+            PopulateVehicleTree(_documentTree);
         }
         catch (Exception exception) when (exception is IOException or UnauthorizedAccessException or DirectoryNotFoundException)
         {
             _documentTree = [];
             DocumentScanStatusText.Text = $"스캔 실패: {exception.Message}";
+            VehicleTree.Items.Clear();
         }
     }
 
@@ -93,5 +98,31 @@ public partial class MainWindow : Window
     private static int CountDocuments(IEnumerable<DocumentItem> items)
     {
         return items.Sum(item => item.IsDirectory ? CountDocuments(item.Children) : 1);
+    }
+
+    private void PopulateVehicleTree(IEnumerable<DocumentItem> items)
+    {
+        VehicleTree.Items.Clear();
+
+        foreach (var item in items)
+        {
+            VehicleTree.Items.Add(CreateTreeItem(item));
+        }
+    }
+
+    private static TreeViewItem CreateTreeItem(DocumentItem item)
+    {
+        var treeItem = new TreeViewItem
+        {
+            Header = item.Name,
+            Tag = item
+        };
+
+        foreach (var child in item.Children)
+        {
+            treeItem.Items.Add(CreateTreeItem(child));
+        }
+
+        return treeItem;
     }
 }
