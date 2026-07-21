@@ -1,0 +1,10 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/VehicleKnowledgeManager.App/VehicleKnowledgeManager.App.csproj" />
+    <Project Path="src/VehicleKnowledgeManager.Core/VehicleKnowledgeManager.Core.csproj" />
+    <Project Path="src/VehicleKnowledgeManager.Infrastructure/VehicleKnowledgeManager.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/VehicleKnowledgeManager.Tests/VehicleKnowledgeManager.Tests.csproj" />
+  </Folder>
+</Solution>
