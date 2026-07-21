@@ -203,7 +203,7 @@ public partial class MainWindow : Window
 
         foreach (var result in results)
         {
-            SearchResultsList.Items.Add($"{result.RelativePath} ({result.MatchCount})");
+            SearchResultsList.Items.Add(CreateSearchResultItem(result));
         }
     }
 
@@ -327,6 +327,43 @@ public partial class MainWindow : Window
         }
 
         return treeItem;
+    }
+
+    private static ListBoxItem CreateSearchResultItem(SearchResult result)
+    {
+        var panel = new StackPanel
+        {
+            Margin = new Thickness(4)
+        };
+
+        panel.Children.Add(new TextBlock
+        {
+            Text = $"{result.FileName} ({result.MatchCount})",
+            FontWeight = FontWeights.SemiBold
+        });
+
+        panel.Children.Add(new TextBlock
+        {
+            Text = result.RelativePath,
+            Foreground = Brushes.DimGray,
+            FontSize = 12
+        });
+
+        if (!string.IsNullOrWhiteSpace(result.PreviewText))
+        {
+            panel.Children.Add(new TextBlock
+            {
+                Text = result.PreviewText,
+                TextWrapping = TextWrapping.Wrap,
+                Margin = new Thickness(0, 4, 0, 0)
+            });
+        }
+
+        return new ListBoxItem
+        {
+            Content = panel,
+            Tag = result
+        };
     }
 
     private void SetEditMode(bool isEditMode)
