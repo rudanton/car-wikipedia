@@ -17,7 +17,10 @@ if (sourcePaths.Count == 0)
     return 1;
 }
 
-Directory.CreateDirectory(options.OutputDirectory);
+if (!options.PreviewOnly)
+{
+    Directory.CreateDirectory(options.OutputDirectory);
+}
 
 var converter = new BasicDocxToMarkdownConverter();
 var successCount = 0;
@@ -36,15 +39,23 @@ foreach (var sourcePath in sourcePaths)
     var targets = BuildTargets(sourcePath, result.Markdown, options);
     foreach (var target in targets)
     {
-        Directory.CreateDirectory(Path.GetDirectoryName(target.OutputPath)!);
-        await File.WriteAllTextAsync(target.OutputPath, target.Markdown, Encoding.UTF8);
-        Console.WriteLine($"OK   {Path.GetFileName(sourcePath)} -> {Path.GetRelativePath(Environment.CurrentDirectory, target.OutputPath)}");
+        if (options.PreviewOnly)
+        {
+            PrintPreview(sourcePath, target);
+        }
+        else
+        {
+            Directory.CreateDirectory(Path.GetDirectoryName(target.OutputPath)!);
+            await File.WriteAllTextAsync(target.OutputPath, target.Markdown, Encoding.UTF8);
+            Console.WriteLine($"OK   {Path.GetFileName(sourcePath)} -> {Path.GetRelativePath(Environment.CurrentDirectory, target.OutputPath)}");
+        }
     }
 
     successCount++;
 }
 
-Console.WriteLine($"완료: 성공 {successCount}개, 실패 {failCount}개");
+var mode = options.PreviewOnly ? "미리보기" : "저장";
+Console.WriteLine($"완료({mode}): 성공 {successCount}개, 실패 {failCount}개");
 return failCount == 0 ? 0 : 2;
 
 static List<string> ResolveSourcePaths(string sourcePath)
@@ -95,14 +106,23 @@ static string SanitizeFileName(string fileName)
     return fileName.Trim();
 }
 
+static void PrintPreview(string sourcePath, MigrationTarget target)
+{
+    Console.WriteLine($"----- PREVIEW: {Path.GetFileName(sourcePath)} -> {Path.GetFileName(target.OutputPath)} -----");
+    Console.WriteLine(target.Markdown.TrimEnd());
+    Console.WriteLine("----- END PREVIEW -----");
+}
+
 static void PrintUsage()
 {
     Console.WriteLine(
         """
         Usage:
           dotnet run --project tools/CarWikipedia.DocxMigrator -- --source <docx-or-folder> --output <folder> [--split-sportage-sorento]
+          dotnet run --project tools/CarWikipedia.DocxMigrator -- --source <docx-or-folder> --preview [--split-sportage-sorento]
 
         Examples:
+          dotnet run --project tools/CarWikipedia.DocxMigrator -- --source "C:\Users\User\Desktop\차 데이터\gv80.docx" --preview
           dotnet run --project tools/CarWikipedia.DocxMigrator -- --source "C:\Users\User\Desktop\차 데이터\gv80.docx" --output ".\vehicles\_converted"
           dotnet run --project tools/CarWikipedia.DocxMigrator -- --source "C:\Users\User\Desktop\차 데이터" --output ".\vehicles\_converted" --split-sportage-sorento
         """);
@@ -113,13 +133,15 @@ internal sealed record MigrationTarget(string OutputPath, string Markdown);
 internal sealed record MigrationOptions(
     string SourcePath,
     string OutputDirectory,
-    bool SplitSportageSorento)
+    bool SplitSportageSorento,
+    bool PreviewOnly)
 {
     public static MigrationOptions? Parse(string[] args)
     {
         string? sourcePath = null;
         string? outputDirectory = null;
         var splitSportageSorento = false;
+        var previewOnly = false;
 
         for (var index = 0; index < args.Length; index++)
         {
@@ -134,17 +156,31 @@ internal sealed record MigrationOptions(
                 case "--split-sportage-sorento":
                     splitSportageSorento = true;
                     break;
+                case "--preview":
+                    previewOnly = true;
+                    break;
             }
         }
 
-        if (string.IsNullOrWhiteSpace(sourcePath) || string.IsNullOrWhiteSpace(outputDirectory))
+        if (string.IsNullOrWhiteSpace(sourcePath))
         {
             return null;
+        }
+
+        if (string.IsNullOrWhiteSpace(outputDirectory))
+        {
+            if (!previewOnly)
+            {
+                return null;
+            }
+
+            outputDirectory = Environment.CurrentDirectory;
         }
 
         return new MigrationOptions(
             Path.GetFullPath(sourcePath),
             Path.GetFullPath(outputDirectory),
-            splitSportageSorento);
+            splitSportageSorento,
+            previewOnly);
     }
 }

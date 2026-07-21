@@ -50,6 +50,12 @@ tools/CarWikipedia.DocxMigrator
 dotnet run --project .\tools\CarWikipedia.DocxMigrator -- --source "C:\Users\User\Desktop\차 데이터\gv80.docx" --output ".\vehicles\_converted"
 ```
 
+저장 전 미리보기 예:
+
+```powershell
+dotnet run --project .\tools\CarWikipedia.DocxMigrator -- --source "C:\Users\User\Desktop\차 데이터\gv80.docx" --preview
+```
+
 폴더 일괄 변환 예:
 
 ```powershell
