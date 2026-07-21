@@ -21,6 +21,7 @@
             <Button Content="이동" Padding="12,6" Click="MoveButton_Click" />
             <Button Content="삭제" Padding="12,6" Click="DeleteButton_Click" />
             <Button Content="새로고침" Padding="12,6" Click="RefreshButton_Click" />
+            <Button Content="폴더 열기" Padding="12,6" Click="OpenFolderButton_Click" />
             <TextBox x:Name="SearchBox" Width="260" Margin="16,0,0,0" VerticalContentAlignment="Center" />
             <Button Content="검색" Padding="12,6" Click="SearchButton_Click" />
             <Button x:Name="FavoriteButton" Content="즐겨찾기" Padding="12,6" Click="FavoriteButton_Click" />
@@ -86,6 +87,13 @@
                                Text="차량 정보"
                                FontWeight="SemiBold"
                                Margin="12,10" />
+                    <TextBlock x:Name="CurrentFilePathText"
+                               DockPanel.Dock="Top"
+                               Foreground="#777"
+                               FontSize="12"
+                               Margin="12,-4,12,8"
+                               Text="선택한 파일 경로가 여기에 표시됩니다."
+                               TextTrimming="CharacterEllipsis" />
                     <TextBlock x:Name="KeyOptionSummaryText"
                                DockPanel.Dock="Top"
                                Foreground="#345"

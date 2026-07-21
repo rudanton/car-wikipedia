@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
@@ -438,6 +439,7 @@ public partial class MainWindow : Window
         _currentMarkdown = string.Empty;
         MarkdownEditor.Text = string.Empty;
         VehicleReadTitle.Text = "차량 정보";
+        ClearCurrentFilePath();
         KeyOptionSummaryText.Text = "핵심 옵션 키워드가 여기에 표시됩니다.";
         VehicleReadDocumentViewer.Document = RenderMarkdown("왼쪽에서 차량 문서를 선택하세요.");
         SetDirtyState(false);
@@ -611,6 +613,7 @@ public partial class MainWindow : Window
             _currentMarkdown = string.Empty;
             MarkdownEditor.Text = string.Empty;
             VehicleReadTitle.Text = "차량 정보";
+            ClearCurrentFilePath();
             KeyOptionSummaryText.Text = "핵심 옵션 키워드가 여기에 표시됩니다.";
             VehicleReadDocumentViewer.Document = RenderMarkdown("현재 문서가 외부에서 삭제되었거나 이동되었습니다.");
             SetDirtyState(false);
@@ -620,6 +623,30 @@ public partial class MainWindow : Window
 
         await OpenDocumentAsync(_currentDocument);
         DocumentScanStatusText.Text = $"새로고침 완료: {_currentDocument.Name}";
+    }
+
+    private void OpenFolderButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (_currentDocument is null)
+        {
+            return;
+        }
+
+        try
+        {
+            var explorerArgument = File.Exists(_currentDocument.FullPath)
+                ? $"/select,\"{_currentDocument.FullPath}\""
+                : $"\"{Path.GetDirectoryName(_currentDocument.FullPath) ?? _currentDocument.FullPath}\"";
+
+            Process.Start(new ProcessStartInfo("explorer.exe", explorerArgument)
+            {
+                UseShellExecute = true
+            });
+        }
+        catch (Exception exception) when (exception is InvalidOperationException or System.ComponentModel.Win32Exception)
+        {
+            DocumentScanStatusText.Text = $"폴더 열기 실패: {exception.Message}";
+        }
     }
 
     private void MarkdownEditor_TextChanged(object sender, TextChangedEventArgs e)
@@ -638,6 +665,7 @@ public partial class MainWindow : Window
         _currentDocument = document;
         _currentMarkdown = markdown;
         VehicleReadTitle.Text = document.Name;
+        CurrentFilePathText.Text = document.FullPath;
         VehicleReadDocumentViewer.Document = RenderMarkdown(markdown);
         KeyOptionSummaryText.Text = BuildKeyOptionSummary(markdown);
         MarkdownEditor.Text = markdown;
@@ -645,6 +673,11 @@ public partial class MainWindow : Window
         SetEditMode(false);
         RememberRecentVehicle(document.FullPath);
         UpdateFavoriteButton();
+    }
+
+    private void ClearCurrentFilePath()
+    {
+        CurrentFilePathText.Text = "선택한 파일 경로가 여기에 표시됩니다.";
     }
 
     private static string ResolveVehicleRootPath(string repositoryPath)
