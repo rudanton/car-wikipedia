@@ -280,6 +280,68 @@ public partial class MainWindow : Window
         }
     }
 
+    private async void NewDocumentButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (string.IsNullOrWhiteSpace(_repositoryPath))
+        {
+            MessageBox.Show(this, "저장소를 먼저 선택하세요.", "저장소 필요", MessageBoxButton.OK, MessageBoxImage.Information);
+            return;
+        }
+
+        if (_hasUnsavedChanges && !ConfirmDiscardChanges())
+        {
+            return;
+        }
+
+        var dialog = new NewVehicleDialog
+        {
+            Owner = this
+        };
+
+        if (dialog.ShowDialog() != true)
+        {
+            return;
+        }
+
+        var vehicleRootPath = ResolveVehicleRootPath(_repositoryPath);
+        var manufacturerPath = Path.Combine(vehicleRootPath, SanitizeFileName(dialog.ManufacturerName));
+        var filePath = Path.Combine(manufacturerPath, SanitizeFileName(dialog.VehicleName) + ".md");
+
+        if (File.Exists(filePath))
+        {
+            MessageBox.Show(this, "같은 이름의 차량 문서가 이미 있습니다.", "문서 생성 실패", MessageBoxButton.OK, MessageBoxImage.Warning);
+            return;
+        }
+
+        var content = _settings.DefaultDocumentTemplate
+            .Replace("차량명", dialog.VehicleName, StringComparison.Ordinal)
+            .Replace("트림명", "트림명", StringComparison.Ordinal);
+
+        await _documentRepository.SaveAsync(filePath, content);
+        await ScanVehicleDocumentsAsync();
+
+        var document = new DocumentItem
+        {
+            Name = Path.GetFileNameWithoutExtension(filePath),
+            FullPath = filePath,
+            RelativePath = Path.GetRelativePath(vehicleRootPath, filePath),
+            IsDirectory = false
+        };
+        _currentTreeItem = null;
+        await OpenDocumentAsync(document);
+        SetEditMode(true);
+    }
+
+    private static string SanitizeFileName(string fileName)
+    {
+        foreach (var invalidChar in Path.GetInvalidFileNameChars())
+        {
+            fileName = fileName.Replace(invalidChar, '_');
+        }
+
+        return fileName.Trim();
+    }
+
     private async void SearchButton_Click(object sender, RoutedEventArgs e)
     {
         if (string.IsNullOrWhiteSpace(_repositoryPath))
