@@ -14,6 +14,20 @@ namespace CarWikipedia.App;
 
 public partial class MainWindow : Window
 {
+    private static readonly string[] HighlightTerms =
+    [
+        "가격",
+        "HUD",
+        "통풍",
+        "메모리",
+        "어라운드뷰",
+        "서라운드 뷰",
+        "스마트 크루즈",
+        "전동 트렁크",
+        "상담",
+        "추천"
+    ];
+
     private readonly FileDocumentRepository _documentRepository = new();
     private readonly MarkdownSearchService _searchService = new();
     private readonly JsonAppSettingsService _settingsService = new();
@@ -641,10 +655,12 @@ public partial class MainWindow : Window
 
         if (line.StartsWith("- ", StringComparison.Ordinal))
         {
-            return new Paragraph(new Run($"• {line[2..]}"))
+            var paragraph = new Paragraph(new Run($"• {line[2..]}"))
             {
-                Margin = new Thickness(18, 2, 0, 2)
+                Margin = new Thickness(18, 2, 0, 2),
             };
+            ApplyHighlightIfNeeded(paragraph, line);
+            return paragraph;
         }
 
         if (line is "기본 옵션" or "추가 옵션")
@@ -657,10 +673,23 @@ public partial class MainWindow : Window
             };
         }
 
-        return new Paragraph(new Run(line))
+        var defaultParagraph = new Paragraph(new Run(line))
         {
             Margin = new Thickness(0, 2, 0, 2)
         };
+        ApplyHighlightIfNeeded(defaultParagraph, line);
+        return defaultParagraph;
+    }
+
+    private static void ApplyHighlightIfNeeded(Paragraph paragraph, string line)
+    {
+        if (!HighlightTerms.Any(term => line.Contains(term, StringComparison.CurrentCultureIgnoreCase)))
+        {
+            return;
+        }
+
+        paragraph.Background = new SolidColorBrush(Color.FromRgb(255, 250, 220));
+        paragraph.Padding = new Thickness(4, 1, 4, 1);
     }
 
     private void PopulateVehicleTree(IEnumerable<DocumentItem> items)
