@@ -131,6 +131,26 @@ public partial class MainWindow : Window
         SetEditMode(!_isEditMode);
     }
 
+    private async void SaveButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (_currentDocument is null)
+        {
+            return;
+        }
+
+        try
+        {
+            _currentMarkdown = MarkdownEditor.Text;
+            await _documentRepository.SaveAsync(_currentDocument.FullPath, _currentMarkdown);
+            VehicleReadText.Text = ToReadText(_currentMarkdown);
+            DocumentScanStatusText.Text = $"저장 완료: {_currentDocument.Name}";
+        }
+        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
+        {
+            DocumentScanStatusText.Text = $"저장 실패: {exception.Message}";
+        }
+    }
+
     private static string ResolveVehicleRootPath(string repositoryPath)
     {
         var vehiclesPath = Path.Combine(repositoryPath, "vehicles");

@@ -17,7 +17,7 @@
             <Button Content="DOCX 가져오기" Padding="12,6" />
             <Separator />
             <Button x:Name="EditModeButton" Content="편집" Padding="12,6" Click="EditModeButton_Click" />
-            <Button Content="저장" Padding="12,6" />
+            <Button Content="저장" Padding="12,6" Click="SaveButton_Click" />
             <Button Content="새로고침" Padding="12,6" />
             <TextBox Width="260" Margin="16,0,0,0" VerticalContentAlignment="Center" />
             <Button Content="검색" Padding="12,6" />
