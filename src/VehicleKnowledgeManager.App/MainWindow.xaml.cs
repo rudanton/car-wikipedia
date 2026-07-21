@@ -6,6 +6,7 @@ using System.Windows.Media;
 using CarWikipedia.Core.Models;
 using CarWikipedia.Core.Settings;
 using CarWikipedia.Infrastructure.FileSystem;
+using CarWikipedia.Infrastructure.Markdown;
 using CarWikipedia.Infrastructure.Settings;
 using Microsoft.Win32;
 
@@ -14,6 +15,7 @@ namespace CarWikipedia.App;
 public partial class MainWindow : Window
 {
     private readonly FileDocumentRepository _documentRepository = new();
+    private readonly MarkdownSearchService _searchService = new();
     private readonly JsonAppSettingsService _settingsService = new();
     private readonly AppSettings _settings;
     private DocumentItem? _currentDocument;
@@ -172,6 +174,36 @@ public partial class MainWindow : Window
         catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
         {
             DocumentScanStatusText.Text = $"저장 실패: {exception.Message}";
+        }
+    }
+
+    private async void SearchButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (string.IsNullOrWhiteSpace(_repositoryPath))
+        {
+            SearchResultsTitle.Text = "검색 결과";
+            SearchResultsList.Items.Clear();
+            SearchResultsList.Items.Add("저장소를 먼저 선택하세요.");
+            return;
+        }
+
+        var keyword = SearchBox.Text.Trim();
+        if (string.IsNullOrWhiteSpace(keyword))
+        {
+            SearchResultsTitle.Text = "검색 결과";
+            SearchResultsList.Items.Clear();
+            SearchResultsList.Items.Add("검색어를 입력하세요.");
+            return;
+        }
+
+        var vehicleRootPath = ResolveVehicleRootPath(_repositoryPath);
+        var results = await _searchService.SearchAsync(vehicleRootPath, keyword);
+        SearchResultsTitle.Text = $"검색 결과 {results.Count}개";
+        SearchResultsList.Items.Clear();
+
+        foreach (var result in results)
+        {
+            SearchResultsList.Items.Add($"{result.RelativePath} ({result.MatchCount})");
         }
     }
 

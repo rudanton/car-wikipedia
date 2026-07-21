@@ -19,8 +19,8 @@
             <Button x:Name="EditModeButton" Content="편집" Padding="12,6" Click="EditModeButton_Click" />
             <Button Content="저장" Padding="12,6" Click="SaveButton_Click" />
             <Button Content="새로고침" Padding="12,6" />
-            <TextBox Width="260" Margin="16,0,0,0" VerticalContentAlignment="Center" />
-            <Button Content="검색" Padding="12,6" />
+            <TextBox x:Name="SearchBox" Width="260" Margin="16,0,0,0" VerticalContentAlignment="Center" />
+            <Button Content="검색" Padding="12,6" Click="SearchButton_Click" />
             <Separator />
             <TextBlock x:Name="RepositoryPathText"
                        Foreground="#555"
@@ -97,15 +97,14 @@
                     BorderBrush="#D8D8D2"
                     BorderThickness="1">
                 <DockPanel>
-                    <TextBlock DockPanel.Dock="Top"
-                               Text="미리보기"
+                    <TextBlock x:Name="SearchResultsTitle"
+                               DockPanel.Dock="Top"
+                               Text="검색 결과"
                                FontWeight="SemiBold"
                                Margin="12,10" />
-                    <ScrollViewer Margin="12,0,12,12">
-                        <TextBlock Text="Markdown 렌더러 연결 전 기본 준비 화면입니다."
-                                   Foreground="#666"
-                                   TextWrapping="Wrap" />
-                    </ScrollViewer>
+                    <ListBox x:Name="SearchResultsList"
+                             BorderThickness="0"
+                             Margin="8,0,8,8" />
                 </DockPanel>
             </Border>
         </Grid>
