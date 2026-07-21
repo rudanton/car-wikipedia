@@ -649,6 +649,12 @@ public partial class MainWindow : Window
         }
     }
 
+    private void VehicleReadDocumentViewer_PreviewMouseWheel(object sender, System.Windows.Input.MouseWheelEventArgs e)
+    {
+        VehicleReadScroll.ScrollToVerticalOffset(VehicleReadScroll.VerticalOffset - e.Delta);
+        e.Handled = true;
+    }
+
     private void MarkdownEditor_TextChanged(object sender, TextChangedEventArgs e)
     {
         if (_currentDocument is null)
