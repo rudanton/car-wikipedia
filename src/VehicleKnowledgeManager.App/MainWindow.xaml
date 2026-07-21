@@ -16,6 +16,7 @@
             <Button Content="새 폴더" Padding="12,6" />
             <Button Content="DOCX 가져오기" Padding="12,6" />
             <Separator />
+            <Button x:Name="EditModeButton" Content="편집" Padding="12,6" Click="EditModeButton_Click" />
             <Button Content="저장" Padding="12,6" />
             <Button Content="새로고침" Padding="12,6" />
             <TextBox Width="260" Margin="16,0,0,0" VerticalContentAlignment="Center" />
@@ -66,7 +67,18 @@
                                Text="차량 정보"
                                FontWeight="SemiBold"
                                Margin="12,10" />
-                    <ScrollViewer Margin="12,0,12,12"
+                    <TextBox x:Name="MarkdownEditor"
+                             AcceptsReturn="True"
+                             AcceptsTab="True"
+                             BorderThickness="0"
+                             FontFamily="Consolas"
+                             FontSize="14"
+                             HorizontalScrollBarVisibility="Auto"
+                             TextWrapping="NoWrap"
+                             VerticalScrollBarVisibility="Auto"
+                             Visibility="Collapsed" />
+                    <ScrollViewer x:Name="VehicleReadScroll"
+                                  Margin="12,0,12,12"
                                   VerticalScrollBarVisibility="Auto">
                         <TextBlock x:Name="VehicleReadText"
                                    Text="왼쪽에서 차량 문서를 선택하세요."

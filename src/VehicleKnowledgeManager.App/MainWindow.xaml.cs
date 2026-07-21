@@ -14,7 +14,10 @@ public partial class MainWindow : Window
     private readonly FileDocumentRepository _documentRepository = new();
     private readonly JsonAppSettingsService _settingsService = new();
     private readonly AppSettings _settings;
+    private DocumentItem? _currentDocument;
+    private string _currentMarkdown = string.Empty;
     private IReadOnlyList<DocumentItem> _documentTree = [];
+    private bool _isEditMode;
     private string? _repositoryPath;
 
     public MainWindow()
@@ -104,14 +107,28 @@ public partial class MainWindow : Window
         try
         {
             var markdown = await _documentRepository.ReadAsync(document.FullPath);
+            _currentDocument = document;
+            _currentMarkdown = markdown;
             VehicleReadTitle.Text = document.Name;
             VehicleReadText.Text = ToReadText(markdown);
+            MarkdownEditor.Text = markdown;
+            SetEditMode(false);
         }
         catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
         {
             VehicleReadTitle.Text = document.Name;
             VehicleReadText.Text = $"문서를 열 수 없습니다.\n\n{exception.Message}";
         }
+    }
+
+    private void EditModeButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (_currentDocument is null)
+        {
+            return;
+        }
+
+        SetEditMode(!_isEditMode);
     }
 
     private static string ResolveVehicleRootPath(string repositoryPath)
@@ -161,5 +178,16 @@ public partial class MainWindow : Window
         }
 
         return treeItem;
+    }
+
+    private void SetEditMode(bool isEditMode)
+    {
+        _isEditMode = isEditMode;
+        MarkdownEditor.Visibility = isEditMode ? Visibility.Visible : Visibility.Collapsed;
+        VehicleReadScroll.Visibility = isEditMode ? Visibility.Collapsed : Visibility.Visible;
+        EditModeButton.Content = isEditMode ? "읽기" : "편집";
+        VehicleReadTitle.Text = _currentDocument is null
+            ? "차량 정보"
+            : isEditMode ? $"{_currentDocument.Name} 편집" : _currentDocument.Name;
     }
 }
