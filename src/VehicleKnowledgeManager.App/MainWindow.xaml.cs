@@ -366,6 +366,14 @@ public partial class MainWindow : Window
 
     private async void DeleteButton_Click(object sender, RoutedEventArgs e)
     {
+        if (VehicleTree.SelectedItem is TreeViewItem selectedTreeItem
+            && selectedTreeItem.Tag is DocumentItem selectedItem
+            && selectedItem.IsDirectory)
+        {
+            await DeleteEmptyFolderAsync(selectedItem);
+            return;
+        }
+
         if (_currentDocument is null)
         {
             return;
@@ -400,6 +408,37 @@ public partial class MainWindow : Window
         SetEditMode(false);
         RefreshRecentVehicles();
         RefreshFavoriteVehicles();
+        await ScanVehicleDocumentsAsync();
+    }
+
+    private async Task DeleteEmptyFolderAsync(DocumentItem folder)
+    {
+        if (!Directory.Exists(folder.FullPath))
+        {
+            await ScanVehicleDocumentsAsync();
+            return;
+        }
+
+        if (Directory.EnumerateFileSystemEntries(folder.FullPath).Any())
+        {
+            MessageBox.Show(this, "비어 있는 폴더만 삭제할 수 있습니다.", "폴더 삭제 실패", MessageBoxButton.OK, MessageBoxImage.Information);
+            return;
+        }
+
+        var result = MessageBox.Show(
+            this,
+            $"'{folder.Name}' 폴더를 삭제할까요?",
+            "폴더 삭제 확인",
+            MessageBoxButton.YesNo,
+            MessageBoxImage.Warning);
+
+        if (result != MessageBoxResult.Yes)
+        {
+            return;
+        }
+
+        Directory.Delete(folder.FullPath);
+        DocumentScanStatusText.Text = $"폴더 삭제 완료: {folder.Name}";
         await ScanVehicleDocumentsAsync();
     }
 
