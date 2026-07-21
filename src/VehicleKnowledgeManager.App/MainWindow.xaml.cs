@@ -332,6 +332,38 @@ public partial class MainWindow : Window
         SetEditMode(true);
     }
 
+    private async void NewFolderButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (string.IsNullOrWhiteSpace(_repositoryPath))
+        {
+            MessageBox.Show(this, "저장소를 먼저 선택하세요.", "저장소 필요", MessageBoxButton.OK, MessageBoxImage.Information);
+            return;
+        }
+
+        var dialog = new ManufacturerFolderDialog
+        {
+            Owner = this
+        };
+
+        if (dialog.ShowDialog() != true)
+        {
+            return;
+        }
+
+        var vehicleRootPath = ResolveVehicleRootPath(_repositoryPath);
+        var manufacturerPath = Path.Combine(vehicleRootPath, SanitizeFileName(dialog.ManufacturerName));
+
+        if (Directory.Exists(manufacturerPath))
+        {
+            MessageBox.Show(this, "같은 이름의 제조사 폴더가 이미 있습니다.", "폴더 생성 실패", MessageBoxButton.OK, MessageBoxImage.Warning);
+            return;
+        }
+
+        Directory.CreateDirectory(manufacturerPath);
+        DocumentScanStatusText.Text = $"폴더 생성 완료: {dialog.ManufacturerName}";
+        await ScanVehicleDocumentsAsync();
+    }
+
     private async void DeleteButton_Click(object sender, RoutedEventArgs e)
     {
         if (_currentDocument is null)

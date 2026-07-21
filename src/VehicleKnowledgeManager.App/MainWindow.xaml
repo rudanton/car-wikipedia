@@ -13,7 +13,7 @@
         <ToolBar DockPanel.Dock="Top" Padding="8,6">
             <Button Content="저장소 열기" Padding="12,6" Click="OpenRepositoryButton_Click" />
             <Button Content="새 문서" Padding="12,6" Click="NewDocumentButton_Click" />
-            <Button Content="새 폴더" Padding="12,6" />
+            <Button Content="새 폴더" Padding="12,6" Click="NewFolderButton_Click" />
             <Button Content="DOCX 가져오기" Padding="12,6" />
             <Separator />
             <Button x:Name="EditModeButton" Content="편집" Padding="12,6" Click="EditModeButton_Click" />
