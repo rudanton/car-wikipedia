@@ -20,12 +20,31 @@ public partial class MainWindow : Window
         "HUD",
         "통풍",
         "메모리",
+        "메모리시트",
+        "어라운드뷰",
+        "서라운드 뷰",
+        "스마트 크루즈",
+        "스마트 크루즈 컨트롤",
+        "자동 트렁크",
+        "전동 트렁크",
+        "2열",
+        "2열 편의사양",
+        "상담",
+        "추천"
+    ];
+
+    private static readonly string[] KeyOptionTerms =
+    [
+        "HUD",
+        "통풍",
+        "메모리",
         "어라운드뷰",
         "서라운드 뷰",
         "스마트 크루즈",
         "전동 트렁크",
-        "상담",
-        "추천"
+        "자동 트렁크",
+        "2열 편의사양",
+        "2열"
     ];
 
     private readonly FileDocumentRepository _documentRepository = new();
@@ -154,6 +173,7 @@ public partial class MainWindow : Window
         {
             VehicleReadTitle.Text = document.Name;
             VehicleReadDocumentViewer.Document = RenderMarkdown($"문서를 열 수 없습니다.\n\n- {exception.Message}");
+            KeyOptionSummaryText.Text = "핵심 옵션 키워드를 확인할 수 없습니다.";
         }
     }
 
@@ -285,6 +305,7 @@ public partial class MainWindow : Window
             _currentMarkdown = MarkdownEditor.Text;
             await _documentRepository.SaveAsync(_currentDocument.FullPath, _currentMarkdown);
             VehicleReadDocumentViewer.Document = RenderMarkdown(_currentMarkdown);
+            KeyOptionSummaryText.Text = BuildKeyOptionSummary(_currentMarkdown);
             SetDirtyState(false);
             DocumentScanStatusText.Text = $"저장 완료: {_currentDocument.Name}";
         }
@@ -417,6 +438,7 @@ public partial class MainWindow : Window
         _currentMarkdown = string.Empty;
         MarkdownEditor.Text = string.Empty;
         VehicleReadTitle.Text = "차량 정보";
+        KeyOptionSummaryText.Text = "핵심 옵션 키워드가 여기에 표시됩니다.";
         VehicleReadDocumentViewer.Document = RenderMarkdown("왼쪽에서 차량 문서를 선택하세요.");
         SetDirtyState(false);
         SetEditMode(false);
@@ -585,6 +607,7 @@ public partial class MainWindow : Window
         _currentMarkdown = markdown;
         VehicleReadTitle.Text = document.Name;
         VehicleReadDocumentViewer.Document = RenderMarkdown(markdown);
+        KeyOptionSummaryText.Text = BuildKeyOptionSummary(markdown);
         MarkdownEditor.Text = markdown;
         SetDirtyState(false);
         SetEditMode(false);
@@ -629,6 +652,18 @@ public partial class MainWindow : Window
         }
 
         return document;
+    }
+
+    private static string BuildKeyOptionSummary(string markdown)
+    {
+        var foundTerms = KeyOptionTerms
+            .Where(term => markdown.Contains(term, StringComparison.CurrentCultureIgnoreCase))
+            .Distinct(StringComparer.CurrentCultureIgnoreCase)
+            .ToList();
+
+        return foundTerms.Count == 0
+            ? "핵심 옵션 키워드: 확인 필요"
+            : $"핵심 옵션 키워드: {string.Join(", ", foundTerms)}";
     }
 
     private static Block CreateReadBlock(string line)
