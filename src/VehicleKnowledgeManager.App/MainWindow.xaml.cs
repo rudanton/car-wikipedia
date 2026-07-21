@@ -590,6 +590,38 @@ public partial class MainWindow : Window
         }
     }
 
+    private async void RefreshButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (_hasUnsavedChanges && !ConfirmDiscardChanges())
+        {
+            return;
+        }
+
+        await ScanVehicleDocumentsAsync();
+
+        if (_currentDocument is null)
+        {
+            return;
+        }
+
+        if (!File.Exists(_currentDocument.FullPath))
+        {
+            _currentDocument = null;
+            _currentTreeItem = null;
+            _currentMarkdown = string.Empty;
+            MarkdownEditor.Text = string.Empty;
+            VehicleReadTitle.Text = "차량 정보";
+            KeyOptionSummaryText.Text = "핵심 옵션 키워드가 여기에 표시됩니다.";
+            VehicleReadDocumentViewer.Document = RenderMarkdown("현재 문서가 외부에서 삭제되었거나 이동되었습니다.");
+            SetDirtyState(false);
+            SetEditMode(false);
+            return;
+        }
+
+        await OpenDocumentAsync(_currentDocument);
+        DocumentScanStatusText.Text = $"새로고침 완료: {_currentDocument.Name}";
+    }
+
     private void MarkdownEditor_TextChanged(object sender, TextChangedEventArgs e)
     {
         if (_currentDocument is null)

@@ -20,7 +20,7 @@
             <Button Content="저장" Padding="12,6" Click="SaveButton_Click" />
             <Button Content="이동" Padding="12,6" Click="MoveButton_Click" />
             <Button Content="삭제" Padding="12,6" Click="DeleteButton_Click" />
-            <Button Content="새로고침" Padding="12,6" />
+            <Button Content="새로고침" Padding="12,6" Click="RefreshButton_Click" />
             <TextBox x:Name="SearchBox" Width="260" Margin="16,0,0,0" VerticalContentAlignment="Center" />
             <Button Content="검색" Padding="12,6" Click="SearchButton_Click" />
             <Button x:Name="FavoriteButton" Content="즐겨찾기" Padding="12,6" Click="FavoriteButton_Click" />
