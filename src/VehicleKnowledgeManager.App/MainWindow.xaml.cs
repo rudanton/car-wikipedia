@@ -38,6 +38,7 @@ public partial class MainWindow : Window
             : _repositoryPath;
 
         RefreshRecentVehicles();
+        RefreshFavoriteVehicles();
         _ = ScanVehicleDocumentsAsync();
     }
 
@@ -64,6 +65,7 @@ public partial class MainWindow : Window
         _settingsService.Save(_settings);
         RepositoryPathText.Text = _repositoryPath;
         RefreshRecentVehicles();
+        RefreshFavoriteVehicles();
 
         await ScanVehicleDocumentsAsync();
     }
@@ -193,6 +195,60 @@ public partial class MainWindow : Window
         await OpenDocumentAsync(document);
     }
 
+    private async void FavoriteVehiclesList_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (FavoriteVehiclesList.SelectedItem is not ListBoxItem item || item.Tag is not string fullPath)
+        {
+            return;
+        }
+
+        if (_hasUnsavedChanges && !ConfirmDiscardChanges())
+        {
+            FavoriteVehiclesList.SelectedItem = null;
+            return;
+        }
+
+        var document = new DocumentItem
+        {
+            Name = Path.GetFileNameWithoutExtension(fullPath),
+            FullPath = fullPath,
+            RelativePath = string.IsNullOrWhiteSpace(_repositoryPath)
+                ? Path.GetFileName(fullPath)
+                : Path.GetRelativePath(ResolveVehicleRootPath(_repositoryPath), fullPath),
+            IsDirectory = false
+        };
+
+        _currentTreeItem = null;
+        await OpenDocumentAsync(document);
+    }
+
+    private void FavoriteButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (_currentDocument is null)
+        {
+            return;
+        }
+
+        var fullPath = _currentDocument.FullPath;
+        var existingIndex = _settings.FavoriteVehiclePaths.FindIndex(path =>
+            string.Equals(path, fullPath, StringComparison.OrdinalIgnoreCase));
+
+        if (existingIndex >= 0)
+        {
+            _settings.FavoriteVehiclePaths.RemoveAt(existingIndex);
+            DocumentScanStatusText.Text = $"즐겨찾기 해제: {_currentDocument.Name}";
+        }
+        else
+        {
+            _settings.FavoriteVehiclePaths.Insert(0, fullPath);
+            DocumentScanStatusText.Text = $"즐겨찾기 추가: {_currentDocument.Name}";
+        }
+
+        _settingsService.Save(_settings);
+        RefreshFavoriteVehicles();
+        UpdateFavoriteButton();
+    }
+
     private void EditModeButton_Click(object sender, RoutedEventArgs e)
     {
         if (_currentDocument is null)
@@ -275,6 +331,7 @@ public partial class MainWindow : Window
         SetDirtyState(false);
         SetEditMode(false);
         RememberRecentVehicle(document.FullPath);
+        UpdateFavoriteButton();
     }
 
     private static string ResolveVehicleRootPath(string repositoryPath)
@@ -452,6 +509,33 @@ public partial class MainWindow : Window
                 Tag = fullPath
             });
         }
+    }
+
+    private void RefreshFavoriteVehicles()
+    {
+        FavoriteVehiclesList.Items.Clear();
+
+        foreach (var fullPath in _settings.FavoriteVehiclePaths.Where(File.Exists))
+        {
+            FavoriteVehiclesList.Items.Add(new ListBoxItem
+            {
+                Content = Path.GetFileNameWithoutExtension(fullPath),
+                Tag = fullPath
+            });
+        }
+    }
+
+    private void UpdateFavoriteButton()
+    {
+        if (_currentDocument is null)
+        {
+            FavoriteButton.Content = "즐겨찾기";
+            return;
+        }
+
+        var isFavorite = _settings.FavoriteVehiclePaths.Any(path =>
+            string.Equals(path, _currentDocument.FullPath, StringComparison.OrdinalIgnoreCase));
+        FavoriteButton.Content = isFavorite ? "즐겨찾기 해제" : "즐겨찾기";
     }
 
     private void SetEditMode(bool isEditMode)

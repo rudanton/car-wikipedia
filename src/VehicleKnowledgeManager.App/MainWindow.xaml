@@ -21,6 +21,7 @@
             <Button Content="새로고침" Padding="12,6" />
             <TextBox x:Name="SearchBox" Width="260" Margin="16,0,0,0" VerticalContentAlignment="Center" />
             <Button Content="검색" Padding="12,6" Click="SearchButton_Click" />
+            <Button x:Name="FavoriteButton" Content="즐겨찾기" Padding="12,6" Click="FavoriteButton_Click" />
             <Separator />
             <TextBlock x:Name="RepositoryPathText"
                        Foreground="#555"
@@ -59,6 +60,13 @@
                                  MaxHeight="130"
                                  BorderThickness="0"
                                  SelectionChanged="RecentVehiclesList_SelectionChanged" />
+                        <TextBlock Text="즐겨찾기"
+                                   FontWeight="SemiBold"
+                                   Margin="4,10,4,4" />
+                        <ListBox x:Name="FavoriteVehiclesList"
+                                 MaxHeight="130"
+                                 BorderThickness="0"
+                                 SelectionChanged="FavoriteVehiclesList_SelectionChanged" />
                     </StackPanel>
                     <TreeView x:Name="VehicleTree" Margin="8,0,8,8" SelectedItemChanged="VehicleTree_SelectedItemChanged" />
                 </DockPanel>

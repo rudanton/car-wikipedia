@@ -12,6 +12,8 @@ public sealed class AppSettings
 
     public List<string> RecentVehiclePaths { get; set; } = [];
 
+    public List<string> FavoriteVehiclePaths { get; set; } = [];
+
     public string DefaultDocumentTemplate { get; set; } = """
         # 차량명
 
