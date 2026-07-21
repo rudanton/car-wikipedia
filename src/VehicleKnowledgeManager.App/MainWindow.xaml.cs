@@ -15,10 +15,12 @@ public partial class MainWindow : Window
     private readonly JsonAppSettingsService _settingsService = new();
     private readonly AppSettings _settings;
     private DocumentItem? _currentDocument;
+    private TreeViewItem? _currentTreeItem;
     private bool _hasUnsavedChanges;
     private string _currentMarkdown = string.Empty;
     private IReadOnlyList<DocumentItem> _documentTree = [];
     private bool _isEditMode;
+    private bool _suppressSelectionChange;
     private string? _repositoryPath;
 
     public MainWindow()
@@ -95,6 +97,11 @@ public partial class MainWindow : Window
 
     private async void VehicleTree_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
     {
+        if (_suppressSelectionChange)
+        {
+            return;
+        }
+
         if (e.NewValue is not TreeViewItem treeViewItem || treeViewItem.Tag is not DocumentItem document)
         {
             return;
@@ -102,6 +109,17 @@ public partial class MainWindow : Window
 
         if (document.IsDirectory)
         {
+            if (_hasUnsavedChanges)
+            {
+                RestoreCurrentSelection();
+            }
+
+            return;
+        }
+
+        if (_hasUnsavedChanges && !ConfirmDiscardChanges())
+        {
+            RestoreCurrentSelection();
             return;
         }
 
@@ -109,6 +127,7 @@ public partial class MainWindow : Window
         {
             var markdown = await _documentRepository.ReadAsync(document.FullPath);
             _currentDocument = document;
+            _currentTreeItem = treeViewItem;
             _currentMarkdown = markdown;
             VehicleReadTitle.Text = document.Name;
             VehicleReadText.Text = ToReadText(markdown);
@@ -190,6 +209,7 @@ public partial class MainWindow : Window
     private void PopulateVehicleTree(IEnumerable<DocumentItem> items)
     {
         VehicleTree.Items.Clear();
+        _currentTreeItem = null;
 
         foreach (var item in items)
         {
@@ -246,5 +266,29 @@ public partial class MainWindow : Window
 
         var suffix = _hasUnsavedChanges ? " *" : string.Empty;
         return isEditMode ? $"{_currentDocument.Name} 편집{suffix}" : $"{_currentDocument.Name}{suffix}";
+    }
+
+    private bool ConfirmDiscardChanges()
+    {
+        var result = MessageBox.Show(
+            this,
+            "저장하지 않은 변경이 있습니다. 변경 내용을 버리고 다른 문서를 열까요?",
+            "변경 내용 확인",
+            MessageBoxButton.YesNo,
+            MessageBoxImage.Warning);
+
+        return result == MessageBoxResult.Yes;
+    }
+
+    private void RestoreCurrentSelection()
+    {
+        if (_currentTreeItem is null)
+        {
+            return;
+        }
+
+        _suppressSelectionChange = true;
+        _currentTreeItem.IsSelected = true;
+        _suppressSelectionChange = false;
     }
 }
