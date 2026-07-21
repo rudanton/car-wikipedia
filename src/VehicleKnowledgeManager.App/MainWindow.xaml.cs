@@ -371,6 +371,63 @@ public partial class MainWindow : Window
         await ScanVehicleDocumentsAsync();
     }
 
+    private async void MoveButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (_currentDocument is null || string.IsNullOrWhiteSpace(_repositoryPath))
+        {
+            return;
+        }
+
+        if (_hasUnsavedChanges && !ConfirmDiscardChanges())
+        {
+            return;
+        }
+
+        var vehicleRootPath = ResolveVehicleRootPath(_repositoryPath);
+        var currentManufacturer = GetManufacturerName(_currentDocument.RelativePath);
+        var dialog = new MoveVehicleDialog(currentManufacturer)
+        {
+            Owner = this
+        };
+
+        if (dialog.ShowDialog() != true)
+        {
+            return;
+        }
+
+        var destinationDirectory = Path.Combine(vehicleRootPath, SanitizeFileName(dialog.ManufacturerName));
+        var destinationPath = Path.Combine(destinationDirectory, Path.GetFileName(_currentDocument.FullPath));
+
+        if (string.Equals(_currentDocument.FullPath, destinationPath, StringComparison.OrdinalIgnoreCase))
+        {
+            return;
+        }
+
+        if (File.Exists(destinationPath))
+        {
+            MessageBox.Show(this, "이동할 위치에 같은 이름의 문서가 이미 있습니다.", "문서 이동 실패", MessageBoxButton.OK, MessageBoxImage.Warning);
+            return;
+        }
+
+        var sourcePath = _currentDocument.FullPath;
+        await _documentRepository.MoveAsync(sourcePath, destinationPath);
+        ReplacePath(_settings.RecentVehiclePaths, sourcePath, destinationPath);
+        ReplacePath(_settings.FavoriteVehiclePaths, sourcePath, destinationPath);
+        _settingsService.Save(_settings);
+
+        await ScanVehicleDocumentsAsync();
+        var movedDocument = new DocumentItem
+        {
+            Name = Path.GetFileNameWithoutExtension(destinationPath),
+            FullPath = destinationPath,
+            RelativePath = Path.GetRelativePath(vehicleRootPath, destinationPath),
+            IsDirectory = false
+        };
+        _currentTreeItem = null;
+        await OpenDocumentAsync(movedDocument);
+        DocumentScanStatusText.Text = $"이동 완료: {movedDocument.Name}";
+    }
+
     private static string SanitizeFileName(string fileName)
     {
         foreach (var invalidChar in Path.GetInvalidFileNameChars())
@@ -379,6 +436,21 @@ public partial class MainWindow : Window
         }
 
         return fileName.Trim();
+    }
+
+    private static string GetManufacturerName(string relativePath)
+    {
+        var parts = relativePath.Split(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+        return parts.Length > 1 ? parts[0] : string.Empty;
+    }
+
+    private static void ReplacePath(List<string> paths, string oldPath, string newPath)
+    {
+        var index = paths.FindIndex(path => string.Equals(path, oldPath, StringComparison.OrdinalIgnoreCase));
+        if (index >= 0)
+        {
+            paths[index] = newPath;
+        }
     }
 
     private async void SearchButton_Click(object sender, RoutedEventArgs e)
