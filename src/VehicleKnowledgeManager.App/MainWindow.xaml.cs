@@ -129,21 +129,39 @@ public partial class MainWindow : Window
 
         try
         {
-            var markdown = await _documentRepository.ReadAsync(document.FullPath);
-            _currentDocument = document;
             _currentTreeItem = treeViewItem;
-            _currentMarkdown = markdown;
-            VehicleReadTitle.Text = document.Name;
-            VehicleReadDocumentViewer.Document = RenderMarkdown(markdown);
-            MarkdownEditor.Text = markdown;
-            SetDirtyState(false);
-            SetEditMode(false);
+            await OpenDocumentAsync(document);
         }
         catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
         {
             VehicleReadTitle.Text = document.Name;
             VehicleReadDocumentViewer.Document = RenderMarkdown($"문서를 열 수 없습니다.\n\n- {exception.Message}");
         }
+    }
+
+    private async void SearchResultsList_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (SearchResultsList.SelectedItem is not ListBoxItem item || item.Tag is not SearchResult result)
+        {
+            return;
+        }
+
+        if (_hasUnsavedChanges && !ConfirmDiscardChanges())
+        {
+            SearchResultsList.SelectedItem = null;
+            return;
+        }
+
+        var document = new DocumentItem
+        {
+            Name = Path.GetFileNameWithoutExtension(result.FileName),
+            FullPath = result.FullPath,
+            RelativePath = result.RelativePath,
+            IsDirectory = false
+        };
+
+        _currentTreeItem = null;
+        await OpenDocumentAsync(document);
     }
 
     private void EditModeButton_Click(object sender, RoutedEventArgs e)
@@ -215,6 +233,18 @@ public partial class MainWindow : Window
         }
 
         SetDirtyState(MarkdownEditor.Text != _currentMarkdown);
+    }
+
+    private async Task OpenDocumentAsync(DocumentItem document)
+    {
+        var markdown = await _documentRepository.ReadAsync(document.FullPath);
+        _currentDocument = document;
+        _currentMarkdown = markdown;
+        VehicleReadTitle.Text = document.Name;
+        VehicleReadDocumentViewer.Document = RenderMarkdown(markdown);
+        MarkdownEditor.Text = markdown;
+        SetDirtyState(false);
+        SetEditMode(false);
     }
 
     private static string ResolveVehicleRootPath(string repositoryPath)

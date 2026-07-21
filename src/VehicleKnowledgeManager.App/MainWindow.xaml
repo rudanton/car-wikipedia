@@ -104,7 +104,8 @@
                                Margin="12,10" />
                     <ListBox x:Name="SearchResultsList"
                              BorderThickness="0"
-                             Margin="8,0,8,8" />
+                             Margin="8,0,8,8"
+                             SelectionChanged="SearchResultsList_SelectionChanged" />
                 </DockPanel>
             </Border>
         </Grid>
