@@ -7,6 +7,7 @@
 
   <PropertyGroup>
     <RootNamespace>CarWikipedia.App</RootNamespace>
+    <AssemblyName>CarWikipedia</AssemblyName>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net10.0-windows</TargetFramework>
     <Nullable>enable</Nullable>

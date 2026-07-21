@@ -37,7 +37,7 @@
 
 - [x] 솔루션 이름을 `CarWikipedia.sln`으로 정리한다.
 - [x] 루트 네임스페이스를 `CarWikipedia`로 정리한다.
-- [ ] 실행 파일명을 `CarWikipedia.exe`로 맞춘다.
+- [x] 실행 파일명을 `CarWikipedia.exe`로 맞춘다.
 - [ ] 저장소 폴더 선택 기능을 추가한다.
 - [ ] 마지막으로 선택한 저장소 폴더를 기억한다.
 - [ ] 선택한 저장소의 `vehicles/` 아래에서 Markdown 파일을 스캔한다.
