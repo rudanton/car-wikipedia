@@ -674,7 +674,7 @@ public partial class MainWindow : Window
             return paragraph;
         }
 
-        if (line is "기본 옵션" or "추가 옵션")
+        if (line is "기본 옵션" or "추가 옵션" or "핵심 옵션" or "주요 옵션")
         {
             return new Paragraph(new Run(line))
             {
