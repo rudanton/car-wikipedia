@@ -653,6 +653,17 @@ public partial class MainWindow : Window
             };
         }
 
+        if (line.StartsWith("## ", StringComparison.Ordinal))
+        {
+            return new Paragraph(new Run(line[3..]))
+            {
+                FontSize = 18,
+                FontWeight = FontWeights.SemiBold,
+                Foreground = Brushes.DarkSlateGray,
+                Margin = new Thickness(0, 14, 0, 6)
+            };
+        }
+
         if (line.StartsWith("- ", StringComparison.Ordinal))
         {
             var paragraph = new Paragraph(new Run($"• {line[2..]}"))
