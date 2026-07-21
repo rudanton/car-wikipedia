@@ -16,22 +16,22 @@
 
 ## Phase 1 - DOCX to Markdown 이관
 
-- [ ] SRS 권장 구조에 맞춰 `vehicles/`, `imports/original-docx/`, `docs/` 폴더를 준비한다.
-- [ ] 차량 문서 저장소 규칙을 `vehicles/{manufacturer}/{vehicle-name}.md`로 정의한다.
-- [ ] 단일 DOCX 가져오기를 추가한다.
-- [ ] 여러 DOCX 일괄 가져오기를 추가한다.
-- [ ] DOCX 제목을 Markdown 제목으로 변환한다.
-- [ ] DOCX 글머리표 목록을 Markdown bullet로 변환한다.
-- [ ] 가능한 경우 DOCX 표를 Markdown 표로 변환한다.
-- [ ] 한국어 텍스트를 UTF-8로 보존한다.
-- [ ] 일반 DOCX 변환 후 차량 문서 전용 정리 규칙을 적용한다.
-- [ ] `` 같은 특수 bullet/화살표 기호를 정규화한다.
-- [ ] 변환 후 과도한 빈 줄을 제거한다.
-- [ ] 원본 DOCX 파일은 수정하거나 삭제하지 않는다.
-- [ ] 사용자가 원할 경우 원본 DOCX를 `imports/original-docx/`에 보관한다.
-- [ ] 가져오기 성공/실패 메시지를 표시한다.
+- [x] SRS 권장 구조에 맞춰 `vehicles/`, `imports/original-docx/`, `docs/` 폴더를 준비한다.
+- [x] 차량 문서 저장소 규칙을 `vehicles/{manufacturer}/{vehicle-name}.md`로 정의한다.
+- [x] 단일 DOCX 가져오기를 추가한다.
+- [x] 여러 DOCX 일괄 가져오기를 추가한다.
+- [x] DOCX 제목을 Markdown 제목으로 변환한다.
+- [x] DOCX 글머리표 목록을 Markdown bullet로 변환한다.
+- [x] 가능한 경우 DOCX 표를 Markdown 표로 변환한다.
+- [x] 한국어 텍스트를 UTF-8로 보존한다.
+- [x] 일반 DOCX 변환 후 차량 문서 전용 정리 규칙을 적용한다.
+- [x] `` 같은 특수 bullet/화살표 기호를 정규화한다.
+- [x] 변환 후 과도한 빈 줄을 제거한다.
+- [x] 원본 DOCX 파일은 수정하거나 삭제하지 않는다.
+- [x] 사용자가 원할 경우 원본 DOCX를 `imports/original-docx/`에 보관한다.
+- [x] 가져오기 성공/실패 메시지를 표시한다.
 - [ ] 변환 결과를 저장하기 전에 미리 확인할 수 있게 한다.
-- [ ] 변환 실패가 전체 일괄 작업을 중단하지 않게 한다.
+- [x] 변환 실패가 전체 일괄 작업을 중단하지 않게 한다.
 
 ## Phase 2 - 로컬 Markdown 지식 베이스 기반
 
