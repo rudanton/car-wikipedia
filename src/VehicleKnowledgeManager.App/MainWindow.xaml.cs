@@ -89,6 +89,31 @@ public partial class MainWindow : Window
         }
     }
 
+    private async void VehicleTree_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
+    {
+        if (e.NewValue is not TreeViewItem treeViewItem || treeViewItem.Tag is not DocumentItem document)
+        {
+            return;
+        }
+
+        if (document.IsDirectory)
+        {
+            return;
+        }
+
+        try
+        {
+            var markdown = await _documentRepository.ReadAsync(document.FullPath);
+            VehicleReadTitle.Text = document.Name;
+            VehicleReadText.Text = ToReadText(markdown);
+        }
+        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
+        {
+            VehicleReadTitle.Text = document.Name;
+            VehicleReadText.Text = $"문서를 열 수 없습니다.\n\n{exception.Message}";
+        }
+    }
+
     private static string ResolveVehicleRootPath(string repositoryPath)
     {
         var vehiclesPath = Path.Combine(repositoryPath, "vehicles");
@@ -98,6 +123,18 @@ public partial class MainWindow : Window
     private static int CountDocuments(IEnumerable<DocumentItem> items)
     {
         return items.Sum(item => item.IsDirectory ? CountDocuments(item.Children) : 1);
+    }
+
+    private static string ToReadText(string markdown)
+    {
+        var lines = markdown.ReplaceLineEndings("\n")
+            .Split('\n')
+            .Select(line => line.TrimEnd())
+            .Select(line => line.StartsWith("### ", StringComparison.Ordinal) ? line[4..] : line)
+            .Select(line => line.StartsWith("# ", StringComparison.Ordinal) ? $"\n{line[2..]}" : line)
+            .Select(line => line.StartsWith("- ", StringComparison.Ordinal) ? $"  • {line[2..]}" : line);
+
+        return string.Join(Environment.NewLine, lines).Trim();
     }
 
     private void PopulateVehicleTree(IEnumerable<DocumentItem> items)

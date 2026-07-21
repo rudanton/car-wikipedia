@@ -50,7 +50,7 @@
                                Foreground="#666"
                                Margin="12,6"
                                Text="스캔 대기 중" />
-                    <TreeView x:Name="VehicleTree" Margin="8,0,8,8" />
+                    <TreeView x:Name="VehicleTree" Margin="8,0,8,8" SelectedItemChanged="VehicleTree_SelectedItemChanged" />
                 </DockPanel>
             </Border>
 
@@ -61,18 +61,19 @@
                     BorderBrush="#D8D8D2"
                     BorderThickness="1">
                 <DockPanel>
-                    <TextBlock DockPanel.Dock="Top"
-                               Text="Markdown 편집기"
+                    <TextBlock x:Name="VehicleReadTitle"
+                               DockPanel.Dock="Top"
+                               Text="차량 정보"
                                FontWeight="SemiBold"
                                Margin="12,10" />
-                    <TextBox AcceptsReturn="True"
-                             AcceptsTab="True"
-                             BorderThickness="0"
-                             FontFamily="Consolas"
-                             FontSize="14"
-                             HorizontalScrollBarVisibility="Auto"
-                             TextWrapping="NoWrap"
-                             VerticalScrollBarVisibility="Auto" />
+                    <ScrollViewer Margin="12,0,12,12"
+                                  VerticalScrollBarVisibility="Auto">
+                        <TextBlock x:Name="VehicleReadText"
+                                   Text="왼쪽에서 차량 문서를 선택하세요."
+                                   FontSize="15"
+                                   LineHeight="24"
+                                   TextWrapping="Wrap" />
+                    </ScrollViewer>
                 </DockPanel>
             </Border>
 
