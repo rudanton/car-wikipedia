@@ -10,6 +10,8 @@ public sealed class AppSettings
 
     public bool PreviewEnabled { get; set; } = true;
 
+    public List<string> RecentVehiclePaths { get; set; } = [];
+
     public string DefaultDocumentTemplate { get; set; } = """
         # 차량명
 

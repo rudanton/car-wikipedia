@@ -37,6 +37,7 @@ public partial class MainWindow : Window
             ? "저장소가 선택되지 않았습니다."
             : _repositoryPath;
 
+        RefreshRecentVehicles();
         _ = ScanVehicleDocumentsAsync();
     }
 
@@ -62,6 +63,7 @@ public partial class MainWindow : Window
         _settings.LastRepositoryPath = _repositoryPath;
         _settingsService.Save(_settings);
         RepositoryPathText.Text = _repositoryPath;
+        RefreshRecentVehicles();
 
         await ScanVehicleDocumentsAsync();
     }
@@ -164,6 +166,33 @@ public partial class MainWindow : Window
         await OpenDocumentAsync(document);
     }
 
+    private async void RecentVehiclesList_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (RecentVehiclesList.SelectedItem is not ListBoxItem item || item.Tag is not string fullPath)
+        {
+            return;
+        }
+
+        if (_hasUnsavedChanges && !ConfirmDiscardChanges())
+        {
+            RecentVehiclesList.SelectedItem = null;
+            return;
+        }
+
+        var document = new DocumentItem
+        {
+            Name = Path.GetFileNameWithoutExtension(fullPath),
+            FullPath = fullPath,
+            RelativePath = string.IsNullOrWhiteSpace(_repositoryPath)
+                ? Path.GetFileName(fullPath)
+                : Path.GetRelativePath(ResolveVehicleRootPath(_repositoryPath), fullPath),
+            IsDirectory = false
+        };
+
+        _currentTreeItem = null;
+        await OpenDocumentAsync(document);
+    }
+
     private void EditModeButton_Click(object sender, RoutedEventArgs e)
     {
         if (_currentDocument is null)
@@ -245,6 +274,7 @@ public partial class MainWindow : Window
         MarkdownEditor.Text = markdown;
         SetDirtyState(false);
         SetEditMode(false);
+        RememberRecentVehicle(document.FullPath);
     }
 
     private static string ResolveVehicleRootPath(string repositoryPath)
@@ -394,6 +424,34 @@ public partial class MainWindow : Window
             Content = panel,
             Tag = result
         };
+    }
+
+    private void RememberRecentVehicle(string fullPath)
+    {
+        _settings.RecentVehiclePaths.RemoveAll(path => string.Equals(path, fullPath, StringComparison.OrdinalIgnoreCase));
+        _settings.RecentVehiclePaths.Insert(0, fullPath);
+
+        if (_settings.RecentVehiclePaths.Count > 10)
+        {
+            _settings.RecentVehiclePaths.RemoveRange(10, _settings.RecentVehiclePaths.Count - 10);
+        }
+
+        _settingsService.Save(_settings);
+        RefreshRecentVehicles();
+    }
+
+    private void RefreshRecentVehicles()
+    {
+        RecentVehiclesList.Items.Clear();
+
+        foreach (var fullPath in _settings.RecentVehiclePaths.Where(File.Exists))
+        {
+            RecentVehiclesList.Items.Add(new ListBoxItem
+            {
+                Content = Path.GetFileNameWithoutExtension(fullPath),
+                Tag = fullPath
+            });
+        }
     }
 
     private void SetEditMode(bool isEditMode)

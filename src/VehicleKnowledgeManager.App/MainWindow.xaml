@@ -51,6 +51,15 @@
                                Foreground="#666"
                                Margin="12,6"
                                Text="스캔 대기 중" />
+                    <StackPanel DockPanel.Dock="Bottom" Margin="8,4,8,8">
+                        <TextBlock Text="최근 본 차량"
+                                   FontWeight="SemiBold"
+                                   Margin="4,4" />
+                        <ListBox x:Name="RecentVehiclesList"
+                                 MaxHeight="130"
+                                 BorderThickness="0"
+                                 SelectionChanged="RecentVehiclesList_SelectionChanged" />
+                    </StackPanel>
                     <TreeView x:Name="VehicleTree" Margin="8,0,8,8" SelectedItemChanged="VehicleTree_SelectedItemChanged" />
                 </DockPanel>
             </Border>
