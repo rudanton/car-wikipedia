@@ -74,6 +74,7 @@
                              FontFamily="Consolas"
                              FontSize="14"
                              HorizontalScrollBarVisibility="Auto"
+                             TextChanged="MarkdownEditor_TextChanged"
                              TextWrapping="NoWrap"
                              VerticalScrollBarVisibility="Auto"
                              Visibility="Collapsed" />

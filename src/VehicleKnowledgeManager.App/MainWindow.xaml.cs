@@ -15,6 +15,7 @@ public partial class MainWindow : Window
     private readonly JsonAppSettingsService _settingsService = new();
     private readonly AppSettings _settings;
     private DocumentItem? _currentDocument;
+    private bool _hasUnsavedChanges;
     private string _currentMarkdown = string.Empty;
     private IReadOnlyList<DocumentItem> _documentTree = [];
     private bool _isEditMode;
@@ -112,6 +113,7 @@ public partial class MainWindow : Window
             VehicleReadTitle.Text = document.Name;
             VehicleReadText.Text = ToReadText(markdown);
             MarkdownEditor.Text = markdown;
+            SetDirtyState(false);
             SetEditMode(false);
         }
         catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
@@ -143,12 +145,23 @@ public partial class MainWindow : Window
             _currentMarkdown = MarkdownEditor.Text;
             await _documentRepository.SaveAsync(_currentDocument.FullPath, _currentMarkdown);
             VehicleReadText.Text = ToReadText(_currentMarkdown);
+            SetDirtyState(false);
             DocumentScanStatusText.Text = $"저장 완료: {_currentDocument.Name}";
         }
         catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
         {
             DocumentScanStatusText.Text = $"저장 실패: {exception.Message}";
         }
+    }
+
+    private void MarkdownEditor_TextChanged(object sender, TextChangedEventArgs e)
+    {
+        if (_currentDocument is null)
+        {
+            return;
+        }
+
+        SetDirtyState(MarkdownEditor.Text != _currentMarkdown);
     }
 
     private static string ResolveVehicleRootPath(string repositoryPath)
@@ -208,6 +221,30 @@ public partial class MainWindow : Window
         EditModeButton.Content = isEditMode ? "읽기" : "편집";
         VehicleReadTitle.Text = _currentDocument is null
             ? "차량 정보"
-            : isEditMode ? $"{_currentDocument.Name} 편집" : _currentDocument.Name;
+            : BuildDocumentTitle(isEditMode);
+    }
+
+    private void SetDirtyState(bool hasUnsavedChanges)
+    {
+        _hasUnsavedChanges = hasUnsavedChanges;
+        VehicleReadTitle.Text = _currentDocument is null
+            ? "차량 정보"
+            : BuildDocumentTitle(_isEditMode);
+
+        if (_currentDocument is not null && hasUnsavedChanges)
+        {
+            DocumentScanStatusText.Text = $"저장되지 않은 변경: {_currentDocument.Name}";
+        }
+    }
+
+    private string BuildDocumentTitle(bool isEditMode)
+    {
+        if (_currentDocument is null)
+        {
+            return "차량 정보";
+        }
+
+        var suffix = _hasUnsavedChanges ? " *" : string.Empty;
+        return isEditMode ? $"{_currentDocument.Name} 편집{suffix}" : $"{_currentDocument.Name}{suffix}";
     }
 }
