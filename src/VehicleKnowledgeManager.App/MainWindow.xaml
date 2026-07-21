@@ -45,7 +45,12 @@
                                Text="차량 문서"
                                FontWeight="SemiBold"
                                Margin="12,10" />
-                    <TreeView Margin="8,0,8,8" />
+                    <TextBlock x:Name="DocumentScanStatusText"
+                               DockPanel.Dock="Bottom"
+                               Foreground="#666"
+                               Margin="12,6"
+                               Text="스캔 대기 중" />
+                    <TreeView x:Name="VehicleTree" Margin="8,0,8,8" />
                 </DockPanel>
             </Border>
 
