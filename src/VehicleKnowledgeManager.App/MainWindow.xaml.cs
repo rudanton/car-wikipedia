@@ -332,6 +332,45 @@ public partial class MainWindow : Window
         SetEditMode(true);
     }
 
+    private async void DeleteButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (_currentDocument is null)
+        {
+            return;
+        }
+
+        var result = MessageBox.Show(
+            this,
+            $"'{_currentDocument.Name}' 문서를 삭제할까요?",
+            "문서 삭제 확인",
+            MessageBoxButton.YesNo,
+            MessageBoxImage.Warning);
+
+        if (result != MessageBoxResult.Yes)
+        {
+            return;
+        }
+
+        var deletedPath = _currentDocument.FullPath;
+        await _documentRepository.DeleteAsync(deletedPath);
+
+        _settings.RecentVehiclePaths.RemoveAll(path => string.Equals(path, deletedPath, StringComparison.OrdinalIgnoreCase));
+        _settings.FavoriteVehiclePaths.RemoveAll(path => string.Equals(path, deletedPath, StringComparison.OrdinalIgnoreCase));
+        _settingsService.Save(_settings);
+
+        _currentDocument = null;
+        _currentTreeItem = null;
+        _currentMarkdown = string.Empty;
+        MarkdownEditor.Text = string.Empty;
+        VehicleReadTitle.Text = "차량 정보";
+        VehicleReadDocumentViewer.Document = RenderMarkdown("왼쪽에서 차량 문서를 선택하세요.");
+        SetDirtyState(false);
+        SetEditMode(false);
+        RefreshRecentVehicles();
+        RefreshFavoriteVehicles();
+        await ScanVehicleDocumentsAsync();
+    }
+
     private static string SanitizeFileName(string fileName)
     {
         foreach (var invalidChar in Path.GetInvalidFileNameChars())
