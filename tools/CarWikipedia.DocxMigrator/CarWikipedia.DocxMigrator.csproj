@@ -5,6 +5,7 @@
   </ItemGroup>
 
   <PropertyGroup>
+    <RootNamespace>CarWikipedia.DocxMigrator</RootNamespace>
     <OutputType>Exe</OutputType>
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>

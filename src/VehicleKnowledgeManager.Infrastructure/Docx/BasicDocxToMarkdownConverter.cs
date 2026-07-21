@@ -1,11 +1,11 @@
-using System.IO.Compression;
+﻿using System.IO.Compression;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
-using VehicleKnowledgeManager.Core.Interfaces;
-using VehicleKnowledgeManager.Core.Models;
+using CarWikipedia.Core.Interfaces;
+using CarWikipedia.Core.Models;
 
-namespace VehicleKnowledgeManager.Infrastructure.Docx;
+namespace CarWikipedia.Infrastructure.Docx;
 
 public sealed class BasicDocxToMarkdownConverter : IDocxToMarkdownConverter
 {

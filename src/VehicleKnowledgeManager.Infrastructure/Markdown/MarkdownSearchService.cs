@@ -1,8 +1,8 @@
-using System.Text;
-using VehicleKnowledgeManager.Core.Interfaces;
-using VehicleKnowledgeManager.Core.Models;
+﻿using System.Text;
+using CarWikipedia.Core.Interfaces;
+using CarWikipedia.Core.Models;
 
-namespace VehicleKnowledgeManager.Infrastructure.Markdown;
+namespace CarWikipedia.Infrastructure.Markdown;
 
 public sealed class MarkdownSearchService : ISearchService
 {

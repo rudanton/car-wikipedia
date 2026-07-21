@@ -1,6 +1,6 @@
-using System.Windows;
+﻿using System.Windows;
 
-namespace VehicleKnowledgeManager.App;
+namespace CarWikipedia.App;
 
 public partial class MainWindow : Window
 {

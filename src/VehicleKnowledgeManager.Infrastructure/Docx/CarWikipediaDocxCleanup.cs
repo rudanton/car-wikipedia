@@ -1,6 +1,6 @@
-using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
 
-namespace VehicleKnowledgeManager.Infrastructure.Docx;
+namespace CarWikipedia.Infrastructure.Docx;
 
 public static class CarWikipediaDocxCleanup
 {

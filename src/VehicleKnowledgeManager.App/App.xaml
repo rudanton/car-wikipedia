@@ -1,7 +1,7 @@
-﻿<Application x:Class="VehicleKnowledgeManager.App.App"
+﻿<Application x:Class="CarWikipedia.App.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:local="clr-namespace:VehicleKnowledgeManager.App"
+             xmlns:local="clr-namespace:CarWikipedia.App"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
          

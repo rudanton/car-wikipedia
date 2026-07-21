@@ -1,4 +1,4 @@
-namespace VehicleKnowledgeManager.Core.Models;
+﻿namespace CarWikipedia.Core.Models;
 
 public sealed class DocumentItem
 {

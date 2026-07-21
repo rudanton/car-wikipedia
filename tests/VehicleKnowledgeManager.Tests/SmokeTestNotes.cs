@@ -1,4 +1,4 @@
-namespace VehicleKnowledgeManager.Tests;
+﻿namespace CarWikipedia.Tests;
 
 public static class SmokeTestNotes
 {

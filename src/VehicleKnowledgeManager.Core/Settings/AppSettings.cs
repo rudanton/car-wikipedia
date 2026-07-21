@@ -1,4 +1,4 @@
-namespace VehicleKnowledgeManager.Core.Settings;
+﻿namespace CarWikipedia.Core.Settings;
 
 public sealed class AppSettings
 {

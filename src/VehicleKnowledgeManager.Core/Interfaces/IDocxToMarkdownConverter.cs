@@ -1,6 +1,6 @@
-using VehicleKnowledgeManager.Core.Models;
+﻿using CarWikipedia.Core.Models;
 
-namespace VehicleKnowledgeManager.Core.Interfaces;
+namespace CarWikipedia.Core.Interfaces;
 
 public interface IDocxToMarkdownConverter
 {

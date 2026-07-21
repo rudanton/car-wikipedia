@@ -2,7 +2,7 @@
 using System.Data;
 using System.Windows;
 
-namespace VehicleKnowledgeManager.App;
+namespace CarWikipedia.App;
 
 /// <summary>
 /// Interaction logic for App.xaml
