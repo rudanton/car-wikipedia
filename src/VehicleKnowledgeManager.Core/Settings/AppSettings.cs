@@ -15,29 +15,13 @@ public sealed class AppSettings
     public List<string> FavoriteVehiclePaths { get; set; } = [];
 
     public string DefaultDocumentTemplate { get; set; } = """
-        # 차량명
+        ### 차량명
 
-        ## 기본 정보
-
-        - 제조사:
-        - 차급:
-        - 연료:
-        - 비고:
-
-        ## 트림
-
-        ### 트림명
-
-        기본 사양
-
+        # 트림명
+        기본 옵션
         -
 
-        선택 옵션
-
-        -
-
-        ## 상담 포인트
-
+        추가 옵션
         -
         """;
 }
