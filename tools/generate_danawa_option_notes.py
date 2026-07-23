@@ -335,17 +335,36 @@ def extract_package_options(text: str) -> list[str]:
     return option_hits(package_text)
 
 
+def split_basic_and_extra_text(block: str) -> tuple[str, str]:
+    markers = [
+        "상세정보 보기",
+        "패키지 선택품목",
+        "선택 품목",
+    ]
+    marker_indexes = [block.find(marker) for marker in markers if block.find(marker) >= 0]
+    if not marker_indexes:
+        return block, ""
+
+    split_at = min(marker_indexes)
+    detail_line_start = block.rfind("\n", 0, split_at)
+    if detail_line_start < 0:
+        detail_line_start = split_at
+    option_name_line_start = block.rfind("\n", 0, detail_line_start)
+    line_start = option_name_line_start if option_name_line_start >= 0 else detail_line_start
+    return block[:line_start], block[line_start:]
+
+
 def extract_options(model: ModelMatch, lineup_id: str, expected_trims: list[str]) -> list[TrimOptions]:
     page = fetch(
         f"https://auto.danawa.com/auto/modelPopup.php?Lineup={lineup_id}&Trims=&Type=price&pcUse=y"
     )
     text = plain_text_from_html(page)
-    package_options = extract_package_options(text)
     trims: list[TrimOptions] = []
 
     for trim_name, block in split_trim_blocks(text, expected_trims):
-        basic = option_hits(block)
-        extras = [option for option in package_options if option not in basic]
+        basic_text, extra_text = split_basic_and_extra_text(block)
+        basic = option_hits(basic_text)
+        extras = [option for option in option_hits(extra_text) if option not in basic]
         trims.append(TrimOptions(trim_name, unique(basic) or ["확인 필요"], unique(extras) or ["확인 필요"]))
 
     if trims:
