@@ -5,6 +5,13 @@
     <ProjectReference Include="..\VehicleKnowledgeManager.Infrastructure\VehicleKnowledgeManager.Infrastructure.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Content Include="..\..\vehicles\**\*.md">
+      <Link>vehicles\%(RecursiveDir)%(Filename)%(Extension)</Link>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+  </ItemGroup>
+
   <PropertyGroup>
     <RootNamespace>CarWikipedia.App</RootNamespace>
     <AssemblyName>CarWikipedia</AssemblyName>
