@@ -244,6 +244,21 @@ def option_hits(text: str) -> list[str]:
     return found
 
 
+def compact_options(options: Iterable[str]) -> list[str]:
+    values = unique(options)
+    replacements = [
+        ({"운전석 통풍시트", "동승석 통풍시트"}, "1열 통풍시트"),
+        ({"운전석 전동시트", "동승석 전동시트"}, "1열 전동시트"),
+    ]
+
+    for members, replacement in replacements:
+        if members.issubset(values):
+            values = [value for value in values if value not in members]
+            values.append(replacement)
+
+    return values
+
+
 def unique(values: Iterable[str]) -> list[str]:
     result: list[str] = []
     for value in values:
@@ -354,6 +369,64 @@ def split_basic_and_extra_text(block: str) -> tuple[str, str]:
     return block[:line_start], block[line_start:]
 
 
+def is_noise_option_name(name: str) -> bool:
+    if not name or len(name) > 70:
+        return True
+    if name.startswith(("•", "▶", "-", "※")):
+        return True
+    if re.match(r"^\d", name) or re.match(r"^[\d,]+$", name):
+        return True
+    return any(token in name for token in ["상세정보", "차량가격", "합계", "견적", "세제혜택"])
+
+
+def extract_toggle_option_groups(extra_text: str, basic_options: list[str]) -> list[str]:
+    stop_markers = [
+        "\n\uacf5\ud1b5 \uc635\uc158",
+        "\n\u25a0 \uc120\ud0dd \ud488\ubaa9 \uc138\ubd80 \uc548\ub0b4",
+        "\n\ud328\ud0a4\uc9c0 \uc635\uc158\n\uc138\ubd80 \uc0ac\uc591",
+        "\nKia Genuine Accessories",
+        "\n\u25a0 \uacf5\ud1b5 \ucc38\uc870\uc0ac\ud56d",
+        "\n\u25a0 \uc778\ud3ec\ud14c\uc778\uba3c\ud2b8 \ucc38\uc870\uc0ac\ud56d",
+    ]
+    for marker in stop_markers:
+        marker_index = extra_text.find(marker)
+        if marker_index > 0:
+            extra_text = extra_text[:marker_index]
+
+    for marker in ["\n구분\n세부내용", "\nFAMILY SITE", "\n다나와 자동차에서", "\n책임의 한계"]:
+        marker_index = extra_text.find(marker)
+        if marker_index > 0:
+            extra_text = extra_text[:marker_index]
+
+    lines = [line.strip() for line in extra_text.splitlines() if line.strip()]
+    starts: list[tuple[int, str]] = []
+
+    for index, line in enumerate(lines[:-1]):
+        if "상세정보 보기" not in lines[index + 1]:
+            continue
+        if is_noise_option_name(line):
+            continue
+        starts.append((index, line))
+
+    if not starts:
+        extras = [option for option in compact_options(option_hits(extra_text)) if option not in basic_options]
+        return extras
+
+    grouped: list[str] = []
+    for group_index, (start, name) in enumerate(starts):
+        end = starts[group_index + 1][0] if group_index + 1 < len(starts) else len(lines)
+        group_text = "\n".join(lines[start:end])
+        options = [option for option in compact_options(option_hits(group_text)) if option not in basic_options]
+        if options:
+            grouped.append(f"{name} - {', '.join(options)}")
+        else:
+            name_options = compact_options(option_hits(name))
+            if name_options:
+                grouped.append(f"{name} - {', '.join(name_options)}")
+
+    return unique(grouped)
+
+
 def extract_options(model: ModelMatch, lineup_id: str, expected_trims: list[str]) -> list[TrimOptions]:
     page = fetch(
         f"https://auto.danawa.com/auto/modelPopup.php?Lineup={lineup_id}&Trims=&Type=price&pcUse=y"
@@ -363,8 +436,8 @@ def extract_options(model: ModelMatch, lineup_id: str, expected_trims: list[str]
 
     for trim_name, block in split_trim_blocks(text, expected_trims):
         basic_text, extra_text = split_basic_and_extra_text(block)
-        basic = option_hits(basic_text)
-        extras = [option for option in option_hits(extra_text) if option not in basic]
+        basic = compact_options(option_hits(basic_text))
+        extras = extract_toggle_option_groups(extra_text, basic)
         trims.append(TrimOptions(trim_name, unique(basic) or ["확인 필요"], unique(extras) or ["확인 필요"]))
 
     if trims:
