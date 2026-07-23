@@ -9,5 +9,7 @@ TestResults/
 artifacts/
 /vehicles/*
 !/vehicles/README.md
+!/vehicles/_generated/
+!/vehicles/_generated/**
 !/vehicles/기아/
 !/vehicles/기아/스포티지.md
